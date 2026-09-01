@@ -1,0 +1,33 @@
+#Virtual Environment
+.venv/
+venv/
+
+# Locals
+src/erp_financial_pipeline/config.py
+
+#Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+#Data layers - never commit raw or unprocessed data
+data/bronze/
+data/silver/
+data/gold/
+
+#dbt build artefacts
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+
+#Great Expectations local site
+great_expectations/uncommitted/
+
+#OS
+.DS_Store
+Thumbs.db
+
+#Environment variables
+.env
+

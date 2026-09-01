@@ -1,0 +1,167 @@
+# ─────────────────────────────────────────────────────────────────────
+# BUILD SYSTEM
+# Tells pip and other tools *how* to build this project into a package.
+# Hatchling is the build backend — it reads the [project] table below
+# and knows how to find your source code, metadata, and dependencies.
+# ─────────────────────────────────────────────────────────────────────
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+# ─────────────────────────────────────────────────────────────────────
+# PROJECT METADATA  (PEP 621)
+# The single source of truth for what this project *is*.
+# ─────────────────────────────────────────────────────────────────────
+[project]
+name        = "erp-financial-pipeline"
+version     = "0.1.0"
+description = "Production-grade ERP financial data pipeline — Delta Lake, dbt Core, Airflow"
+readme      = "README.md"
+license     = { text = "MIT" }
+requires-python = ">=3.13"
+
+# Core runtime dependencies — everything the pipeline needs to *run*.
+# These are installed by default with: pip install .
+dependencies = [
+    # HTTP client — talks to the US Treasury Fiscal Data API
+    "requests>=2.31.0",
+
+    # Data processing — DataFrames, type casting, CSV output
+    "pandas>=2.2.3",
+
+    # Arrow columnar format — the shared memory bridge between
+    # Delta Lake (deltalake) and DuckDB. Never called directly,
+    # but required by both.
+    "pyarrow>=15.0.0",
+
+    # Delta Lake (ACID-compliant storage) — pure Python, no Spark
+    "deltalake>=1.0.0",
+
+    # In-process SQL engine — reads Delta tables, powers dbt
+    "duckdb>=1.0.0",
+
+    # dbt transformation layer
+    "dbt-core>=1.8.0,<2.0",
+    "dbt-duckdb>=1.8.0",
+
+    # Data quality gate between Silver and Gold
+    "great-expectations>=1.0.0",
+]
+
+# Optional dependency groups — installed on demand.
+# The "dev" group contains everything needed for local development,
+# testing, and linting but NOT needed in production.
+# Install with: pip install -e ".[dev]"
+[project.optional-dependencies]
+dev = [
+    # Test runner
+    "pytest>=7.4.0",
+
+    # Coverage measurement — integrates with Codecov in GitHub Actions
+    "pytest-cov>=4.0.0",
+
+    # Linter + formatter — replaces flake8, isort, pyupgrade, and more
+    "ruff>=0.4.0",
+]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# HATCHLING — build target configuration
+# Tells hatchling where your Python source package lives.
+# "src" maps to the src/ folder which contains __init__.py,
+# making it importable as a package (from src.config import ...).
+# ─────────────────────────────────────────────────────────────────────
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# PYTEST
+# ─────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+# Where pytest looks for test files
+testpaths = ["tests"]
+
+# Default flags applied to every pytest run:
+#   -v                    verbose output — shows each test name
+#   --tb=short            shorter traceback on failure — easier to read
+#   --cov=src             measure coverage on the src/ package
+#   --cov-report=term-missing  print uncovered lines in the terminal
+addopts = "-v --tb=short --cov=src --cov-report=term-missing"
+
+# Custom markers let you tag tests as "unit" or "integration".
+# In GitHub Actions CI we will run: pytest -m "not integration"
+# so slow network-hitting tests are excluded from the automated build.
+markers = [
+    "unit: fast, isolated, no I/O or network calls",
+    "integration: touches the filesystem, Delta tables, or live API",
+]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# RUFF — linter and formatter
+# Ruff is a single tool written in Rust that replaces:
+#   flake8 (style errors), isort (import ordering),
+#   pyupgrade (modernise Python syntax), flake8-bugbear (bug patterns),
+#   and pep8-naming (naming conventions).
+# It runs in milliseconds on large codebases.
+# ─────────────────────────────────────────────────────────────────────
+[tool.ruff]
+# The Python version ruff should assume when checking syntax.
+# Must match requires-python above.
+target-version = "py313"
+
+# Maximum characters per line. 88 matches Black's default —
+# the de facto standard on most engineering teams.
+line-length = 88
+
+[tool.ruff.lint]
+# Each letter code activates a rule set:
+select = [
+    "E",   # pycodestyle — spacing, indentation, blank lines
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes — undefined names, unused imports
+    "I",   # isort — import ordering and grouping
+    "UP",  # pyupgrade — use modern Python syntax automatically
+    "B",   # flake8-bugbear — common bug patterns (mutable defaults, etc.)
+    "N",   # pep8-naming — function_names, ClassNames, CONSTANTS
+    "S",   # security stuff
+]
+ignore = [
+    # E501 = line too long. We let the formatter handle line length
+    # rather than flagging it as a lint error.
+    "E501",
+]
+
+[tool.ruff.lint.isort]
+# Tells isort that "src" is a first-party package (your own code),
+# so it gets its own import group, separated from third-party imports.
+known-first-party = ["src"]
+
+[tool.ruff.format]
+quote-style = "double"   # consistent double quotes throughout
+indent-style = "space"   # spaces, not tabs
+line-ending  = "auto"    # LF on Mac/Linux, CRLF on Windows
+
+
+# ─────────────────────────────────────────────────────────────────────
+# COVERAGE.PY
+# Controls what gets measured and how it is reported.
+# pytest-cov uses these settings automatically.
+# ─────────────────────────────────────────────────────────────────────
+[tool.coverage.run]
+# Measure coverage only on src/ — not on tests themselves
+source = ["src"]
+# Exclude test files from the measurement
+omit   = ["tests/*"]
+
+[tool.coverage.report]
+# Show which specific lines were not covered
+show_missing = true
+# Do not hide files that were 100% covered — show everything
+skip_covered = false
+# Fail the CI build if overall coverage drops below this threshold.
+# Start at 0 and raise it as you add more tests.
+fail_under   = 0
+
