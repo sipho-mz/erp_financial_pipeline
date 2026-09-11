@@ -1,0 +1,19 @@
+erp_financial_pipeline:
+  target: dev        # which output to use by default
+
+  outputs:
+    dev:
+      type:    duckdb
+
+      # The DuckDB database file — your physical Gold layer.
+      # Reads from ERP_GOLD_DIR environment variable at runtime.
+      path:    "{{ var('ERP_GOLD_DIR', 'data/gold') }}/warehouse.duckdb"
+
+      # Load the Delta Lake extension so DuckDB can read delta_scan().
+      # dbt-duckdb installs and loads this before running any model.
+      extensions:
+        - delta
+
+      # How many models dbt can build in parallel.
+      threads: 4
+

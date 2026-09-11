@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: int_revenue_monthly
+    description: >
+      Revenue aggregated to monthly grain per top-level category.
+      Grain: one row per period_start_date × revenue_category.
+      Note that the api endpoints found differ from the expected ones.
+      Expected a revenue endpoint, found a cost endpoint.
+    columns:
+      - name: period_start_date
+        tests:
+          - not_null
+      - name: us_department_name
+        tests:
+          - not_null
+      - name: net_cost_month
+        description: "Sum of all revenue sub-items for this category in the month."
+
+  - name: int_outlays_by_category
+    description: >
+      Outlays aggregated to monthly grain per top-level category.
+      Grain: one row per period_start_date × outlay_category.
+      Note that the api endpoints found differ from the expected ones.
+      Expected an outlays endpoint, found an operations endpoint.
+    columns:
+      - name: period_start_date
+        tests:
+          - not_null
+      - name: account_name
+        tests:
+          - not_null

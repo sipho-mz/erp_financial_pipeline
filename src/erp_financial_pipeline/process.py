@@ -88,7 +88,7 @@ def _process_ops(df: pd.DataFrame) -> pd.DataFrame:
             line_item    = df["line_item_desc"].str.strip(),
             consol_cost  = _clean_amount(df["consolidated_bil_amt"]),
         ) [[
-            "_ingested_at", "_source", "account", "line_item", "consol_cost",
+            "_ingested_at", "_source", "date", "account", "line_item", "consol_cost", "fiscal_year",
         ]]
         .dropna(subset=["consol_cost", "account"])
         .drop_duplicates(subset=["line_item"])
@@ -108,7 +108,7 @@ def _process_cash_balance(df: pd.DataFrame) -> pd.DataFrame:
             line_item    = df["line_item_desc"].str.strip(),
             position_amt = _clean_amount(df["position_bil_amt"]),
         ) [[
-            "_ingested_at", "_source", "account", "line_item", "position_amt",
+            "_ingested_at", "_source", "date", "account", "line_item", "position_amt", "fiscal_year",
         ]]
         .dropna(subset=["position_amt", "account"])
         .drop_duplicates(subset=["line_item"])

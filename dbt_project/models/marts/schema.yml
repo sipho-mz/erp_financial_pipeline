@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: dim_fiscal_period
+    description: >
+      Fiscal calendar dimension. One row per unique fiscal period
+      (year / quarter / month). Shared time axis for all fact tables.
+    columns:
+      - name: period_id
+        description: "Integer surrogate key. Unique per period."
+        tests:
+          - unique
+          - not_null
+      - name: period_start_date
+        tests:
+          - not_null
+      - name: fiscal_year_label
+        tests:
+          - not_null
+      - name: fiscal_quarter_label
+        tests:
+          - not_null
+
+  - name: fct_revenue
+    description: >
+      Revenue fact table. Grain: one row per fiscal period per revenue category.
+      Joins to dim_fiscal_period via period_id.
+    columns:
+      - name: period_id
+        description: "Foreign key to dim_fiscal_period."
+        tests:
+          - not_null
+      - name: us_department_name
+        tests:
+          - not_null
+      - name: net_cost_current_month
+        description: "Revenue collected in the reporting month, millions USD."
+
+  - name: fct_outlays
+    description: >
+      Outlays fact table. Grain: one row per fiscal period per outlay category.
+    columns:
+      - name: period_id
+        tests:
+          - not_null
+      - name: account_name
+        tests:
+          - not_null

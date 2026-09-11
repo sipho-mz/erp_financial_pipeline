@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: stg_revenues
+    description: >
+      Renamed revenue records from the Silver Delta layer.
+      One row per item.
+      Note that the api endpoints found differ from the expected ones.
+      Expected a revenue endpoint, found a cost endpoint.
+    columns:
+      - name: cost_date
+        description: "Reporting date for the cost entry."
+        tests:
+          - not_null
+      - name: us_department_name
+        description: "Government Agency/Department name."
+        tests:
+          - not_null
+      - name: fiscal_year
+        tests:
+          - not_null
+      - name: net_department_cost
+        description: "Net cost by each department, millions USD."
+
+  - name: stg_outlays
+    description: >
+      Renamed outlay records from the Silver Delta layer.
+      One row per classification line item per reporting month.
+      Note that the api endpoints found differ from the expected ones.
+      Expected an outlays endpoint, found an operations endpoint.
+    columns:
+      - name: operations_date
+        tests:
+          - not_null
+      - name: account_name
+        tests:
+          - not_null
+      - name: fiscal_year
+        tests:
+          - not_null
+      - name: consolidated_ops_cost
+        description: "Consolidated cost by account, millions USD."
+
+  - name: stg_cash_balance
+    description: >
+      Daily Treasury cash balance records from the Silver Delta layer.
+      One row per account type per day.
+    columns:
+      - name: cash_balance_date
+        tests:
+          - not_null
+      - name: account_name
+        tests:
+          - not_null
+      - name: fiscal_year
+        tests:
+          - not_null
+      - name: position_amount
+        description: "Standing amount by account, millions USD."
+
